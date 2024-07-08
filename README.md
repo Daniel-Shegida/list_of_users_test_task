@@ -1,16 +1,37 @@
-# list_of_users_test_task
+# Simple Test Task
 
-A new Flutter project.
+## Comments to implementation (anything that you think matters)
+### Questions 
+Если это было бы не тестовое задание, я бы для начала задал бы ряд вопросов к таске, а почему я их не задал, можете узнать у меня на интервью :)
++ Я не нашел у гитхаба запросы, которые бы включали бы в себя получение списка пользователей с именами(не логинами) и фоловерами, их нет ни в graphql ни в rest api, возможно кто то знает, как обойти эту проблему? (ну или просто бы спросил "А ты знал, что у гитахаба нет поиска по алфовиту? ) ")
++ в таске это не указано, но нужно ли добавлять пагинацию
++ дополнительно, нет дизайна состояния загрузок, их можно сделать на свой вкус?
++ В дизайне нарисована поисковая строка, но не совсем ясно, относится ли фича “Users of the app can filter Github users by nickname.” к ней, т.к пользователи уже могут фильтровать пользователей по первым буквам
++ Если поиск нужно сделать, какая у него должна быть логика: Производить поиск из api гитхаба или только по уже загруженным пользователям
++ Нужно ли добавлять в каком либо виде обработку ошибок: снекбары, новые состояния экраном и тд
++ В обычном состоянии, api github поддерживает до 60 запросов в час для неавторизированных пользователей, нужно ли их авторизировать?
 
-## Getting Started
+### Main idea
+С учетом того, что у gitgub api не было нужных запросов, которые сразу бы вернули нужные данные, было решено сделать следующие:
+  + сначала получаем список пользотелей
+  + потом для каждого пользователя запрашиваем отдельно всю нужную информацию
 
-This project is a starting point for a Flutter application.
 
-A few resources to get you started if this is your first Flutter project:
+### Startup
+единственное, что необходимо, это добавить в .env personal access token  
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Difficults: 
+На данный момент, загрузки новых страниц слишком долгие. Это можно решить уменьшив размер страниц, добавив загрузку страниц перед тем, как пользователь долистает до конца
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### Результат: 
+Первая загрузка
+
+![startup ](https://github.com/Daniel-Shegida/list_of_users_test_task/assets/47796424/6759209e-1e3f-473f-bc24-47ee8a73517b)
+
+Функционал фильтрации: 
+
+![filter](https://github.com/Daniel-Shegida/list_of_users_test_task/assets/47796424/18df5024-799b-401e-80f9-74a0c28e4535)
+
+Функционал поиска 
+
+![search](https://github.com/Daniel-Shegida/list_of_users_test_task/assets/47796424/65e06cf2-b2ff-42ec-9359-1e64b76e5902)
