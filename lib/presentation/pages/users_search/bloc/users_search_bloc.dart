@@ -31,7 +31,7 @@ class UsersSearchBloc extends Bloc<UsersSearchEvent, UsersSearchState> {
 
   /// getters that return one of users list depending on currentFilter
   List<User> get users {
-    switch (currentFilter) {
+    switch (_currentFilter) {
       case SearchFilters.ah:
         return _firstFilteredUsers;
       case SearchFilters.ip:
@@ -47,19 +47,19 @@ class UsersSearchBloc extends Bloc<UsersSearchEvent, UsersSearchState> {
   int _lastId = 0;
 
   /// page parameter for search
-  int searchPage = 0;
+  int _searchPage = 0;
 
   /// current state of filter
-  SearchFilters currentFilter = SearchFilters.ah;
+  SearchFilters _currentFilter = SearchFilters.ah;
 
   /// is needed to show filter filter
-  bool isFilterVisible = true;
+  bool _isFilterVisible = true;
 
   /// search parameter for search
-  String lastSearch = '';
+  String _lastSearch = '';
 
   /// does search meet end
-  bool isSearchCompleted = false;
+  bool _isSearchCompleted = false;
 
   UsersSearchBloc(
     this._usersRepository,
@@ -74,22 +74,22 @@ class UsersSearchBloc extends Bloc<UsersSearchEvent, UsersSearchState> {
 
   Future<void> _onSearch(_Search event, Emitter<UsersSearchState> emit) async {
     /// clear all values and prepare screen for search
-    currentFilter = SearchFilters.empty;
-    lastSearch = event.search;
+    _currentFilter = SearchFilters.empty;
+    _lastSearch = event.search;
     _listOfSearchUsers.clear();
-    isFilterVisible = false;
-    isSearchCompleted = false;
-    searchPage = 1;
+    _isFilterVisible = false;
+    _isSearchCompleted = false;
+    _searchPage = 1;
     emit(
       _Empty(
-        isFilerVisible: isFilterVisible,
-        filterValue: currentFilter,
+        isFilerVisible: _isFilterVisible,
+        filterValue: _currentFilter,
       ),
     );
 
     /// fetch users
     if (event.search.isNotEmpty) {
-      final result = await _searchUsers(searchPage);
+      final result = await _searchUsers(_searchPage);
 
       ///  close this one  if new search event is pushed
       if (emit.isDone) {
@@ -97,8 +97,8 @@ class UsersSearchBloc extends Bloc<UsersSearchEvent, UsersSearchState> {
       }
 
       /// gets values from api req
-      searchPage++;
-      isSearchCompleted = result.$1;
+      _searchPage++;
+      _isSearchCompleted = result.$1;
 
       /// if results is not empty show users
       if (result.$2.isNotEmpty) {
@@ -106,9 +106,9 @@ class UsersSearchBloc extends Bloc<UsersSearchEvent, UsersSearchState> {
         emit(
           _Loaded(
             users: _listOfSearchUsers,
-            isFilerVisible: isFilterVisible,
-            filterValue: currentFilter,
-            isLast: isSearchCompleted,
+            isFilerVisible: _isFilterVisible,
+            filterValue: _currentFilter,
+            isLast: _isSearchCompleted,
           ),
         );
 
@@ -117,8 +117,8 @@ class UsersSearchBloc extends Bloc<UsersSearchEvent, UsersSearchState> {
         emit(
           _Empty(
             emptyMessage: 'No users found',
-            isFilerVisible: isFilterVisible,
-            filterValue: currentFilter,
+            isFilerVisible: _isFilterVisible,
+            filterValue: _currentFilter,
           ),
         );
       }
@@ -128,8 +128,8 @@ class UsersSearchBloc extends Bloc<UsersSearchEvent, UsersSearchState> {
       emit(
         _Empty(
           emptyMessage: 'Please enter request',
-          isFilerVisible: isFilterVisible,
-          filterValue: currentFilter,
+          isFilerVisible: _isFilterVisible,
+          filterValue: _currentFilter,
         ),
       );
     }
@@ -138,13 +138,13 @@ class UsersSearchBloc extends Bloc<UsersSearchEvent, UsersSearchState> {
   /// event when close search bar, returns filter
   Future<void> _onFinishSearch(
       _FinishSearch event, Emitter<UsersSearchState> emit) async {
-    if (currentFilter == SearchFilters.empty) {
-      isFilterVisible = true;
-      currentFilter = SearchFilters.ah;
+    if (_currentFilter == SearchFilters.empty) {
+      _isFilterVisible = true;
+      _currentFilter = SearchFilters.ah;
       emit(
         _Loaded(
           users: users,
-          filterValue: currentFilter,
+          filterValue: _currentFilter,
         ),
       );
     }
@@ -154,7 +154,7 @@ class UsersSearchBloc extends Bloc<UsersSearchEvent, UsersSearchState> {
   Future<void> _onLoadMore(
       _LoadMore event, Emitter<UsersSearchState> emit) async {
     /// filter logic
-    if (isFilterVisible) {
+    if (_isFilterVisible) {
       final newUsers = await _usersRepository.getUserList(
         lastId: _lastId,
         pageSize: 50,
@@ -184,23 +184,23 @@ class UsersSearchBloc extends Bloc<UsersSearchEvent, UsersSearchState> {
         _Loaded(
           users: users,
           refreshValue: DateTime.now(),
-          filterValue: currentFilter,
-          isFilerVisible: isFilterVisible,
+          filterValue: _currentFilter,
+          isFilerVisible: _isFilterVisible,
         ),
       );
 
       /// search logic
     } else {
-      final result = await _searchUsers(searchPage);
-      searchPage++;
-      isSearchCompleted = result.$1;
+      final result = await _searchUsers(_searchPage);
+      _searchPage++;
+      _isSearchCompleted = result.$1;
       _listOfSearchUsers.addAll(result.$2);
       emit(
         _Loaded(
           users: _listOfSearchUsers,
           refreshValue: DateTime.now(),
-          filterValue: currentFilter,
-          isFilerVisible: isFilterVisible,
+          filterValue: _currentFilter,
+          isFilerVisible: _isFilterVisible,
         ),
       );
     }
@@ -214,7 +214,7 @@ class UsersSearchBloc extends Bloc<UsersSearchEvent, UsersSearchState> {
         filterValue: event.filter,
       ),
     );
-    currentFilter = event.filter;
+    _currentFilter = event.filter;
 
     /// waiting is necessary to refresh position of user list
     await Future.delayed(const Duration(milliseconds: 125));
@@ -223,7 +223,7 @@ class UsersSearchBloc extends Bloc<UsersSearchEvent, UsersSearchState> {
       _Loaded(
         users: users,
         refreshValue: DateTime.now(),
-        filterValue: currentFilter,
+        filterValue: _currentFilter,
       ),
     );
   }
@@ -231,9 +231,9 @@ class UsersSearchBloc extends Bloc<UsersSearchEvent, UsersSearchState> {
   /// decoration for searching users
   Future<(bool, List<User>)> _searchUsers(int page) async {
     return _usersRepository.searchUsers(
-      search: lastSearch,
+      search: _lastSearch,
       page: page,
-      pageSize: 50,
+      pageSize: 25,
     );
   }
 }
